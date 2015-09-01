@@ -8,9 +8,9 @@ import org.json.JSONException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class Sharedpreferences extends CordovaPlugin {
-	public static final String GET_SHARED_PREFERENCES = "getSharedPreferences";
 	public static final String PUT_STRING = "putString";
 	public static final String GET_STRING = "getString";
 	public static final String PUT_BOOLEAN = "putBoolean";
@@ -26,7 +26,7 @@ public class Sharedpreferences extends CordovaPlugin {
 	public static final String SHARED_PREFERENCES = "SharedPreferences";
 	public static String PREF_FILE = "";
 	public static final String[] MODE_ARRAY = {"MODE_APPEND", "MODE_PRIVATE"};
-	SharedPreferences SharedPref;
+	SharedPreferences SharedPref = null;
 	SharedPreferences.Editor editor;
 
 	@Override
@@ -34,35 +34,10 @@ public class Sharedpreferences extends CordovaPlugin {
 		//create shared Preferences
 		//two param filename and mode
 		//returns true if created with success message and false if not with exception message
-		if (GET_SHARED_PREFERENCES.equals(action)) {
-			PREF_FILE = args.getString(0);
-			String modeType = args.getString(1);
-			Context context = cordova.getActivity();
-			if(in_array(MODE_ARRAY, modeType)){
-				if(modeType.equals("MODE_APPEND")){
-					try{
-						SharedPref = context.getSharedPreferences(PREF_FILE, Context.MODE_APPEND);
-					}catch(Exception e){
-						callbackContext.error("Error creating Shared Preferences" + e.getMessage());
-						return false;
-					}
-				}else if(modeType.equals("MODE_PRIVATE")){
-					try{
-						SharedPref = context.getSharedPreferences(PREF_FILE, Context.MODE_APPEND);
-					}catch(Exception e){
-						callbackContext.error("Error creating Shared Preferences" + e.getMessage());
-						return false;
-					}
-				}
-				callbackContext.success("Shared Preferences Created");
-				return true;
-			}else{
-				callbackContext.error("Invalid Mode provided");
-				return false;
-			}
-		//Put a Sting into the Shared Preferences File
-		//params key and value String type
-		}else if(PUT_STRING.equals(action)){
+		if (SharedPref == null) {
+			SharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+		}
+		if(PUT_STRING.equals(action)){
 			editor = SharedPref.edit();
 			try{
 				editor.putString(args.getString(0), args.getString(1));
@@ -72,10 +47,10 @@ public class Sharedpreferences extends CordovaPlugin {
 				return false;
 			}
 			callbackContext.success("Added Value " + args.getString(1) + " to Preferences key " + args.getString(0));
-			return true;		
-		}else if(GET_STRING.equals(action)){									
-			String KeyVal;			
-			try{				
+			return true;
+		}else if(GET_STRING.equals(action)){
+			String KeyVal;
+			try{
 				if(SharedPref.contains(args.getString(0))){
 					KeyVal = SharedPref.getString(args.getString(0), "");
 					callbackContext.success(KeyVal);
@@ -98,10 +73,10 @@ public class Sharedpreferences extends CordovaPlugin {
 				return false;
 			}
 			callbackContext.success("Added Value " + args.getBoolean(1) + " to Preferences key " + args.getString(0));
-			return true;		
-		}else if(GET_BOOLEAN.equals(action)){									
+			return true;
+		}else if(GET_BOOLEAN.equals(action)){
 			Boolean KeyVal;
-			try{				
+			try{
 				if(SharedPref.contains(args.getString(0))){
 					KeyVal = SharedPref.getBoolean(args.getString(0), false);
 					if(KeyVal.equals(true)){
@@ -128,10 +103,10 @@ public class Sharedpreferences extends CordovaPlugin {
 				return false;
 			}
 			callbackContext.success("Added Value " + args.getInt(1) + " to Preferences key " + args.getString(0));
-			return true;		
-		}else if(GET_INT.equals(action)){									
+			return true;
+		}else if(GET_INT.equals(action)){
 			Integer KeyVal;
-			try{				
+			try{
 				if(SharedPref.contains(args.getString(0))){
 					KeyVal = SharedPref.getInt(args.getString(0), 0);
 					callbackContext.success(KeyVal);
@@ -154,10 +129,10 @@ public class Sharedpreferences extends CordovaPlugin {
 				return false;
 			}
 			callbackContext.success("Added Value " + args.getLong(1) + " to Preferences key " + args.getString(0));
-			return true;		
-		}else if(GET_LONG.equals(action)){									
+			return true;
+		}else if(GET_LONG.equals(action)){
 			Long KeyVal;
-			try{				
+			try{
 				if(SharedPref.contains(args.getString(0))){
 					KeyVal = SharedPref.getLong(args.getString(0), 0);
 					callbackContext.success(KeyVal.toString());
@@ -180,10 +155,10 @@ public class Sharedpreferences extends CordovaPlugin {
 				return false;
 			}
 			callbackContext.success("Removed Value from Key " + args.getString(0));
-			return true;		
+			return true;
 		}else if(CLEAR.equals(action)){
 			editor = SharedPref.edit();
-			try{				
+			try{
 				editor.clear();
 				editor.commit();
 			}catch (Exception e){
@@ -191,14 +166,14 @@ public class Sharedpreferences extends CordovaPlugin {
 				return false;
 			}
 			callbackContext.success("Cleared preference File ");
-			
+
 			return true;
 		}else{
 			callbackContext.error("Invalid Action");
 			return false;
 		}
     }
-	
+
 	public static boolean in_array(String[] haystack, String needle) {
 	    for(int i=0;i<haystack.length;i++) {
 	        if(haystack[i].equals(needle)) {

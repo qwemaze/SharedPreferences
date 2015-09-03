@@ -34,6 +34,7 @@ public class Sharedpreferences extends CordovaPlugin {
 		//create shared Preferences
 		//two param filename and mode
 		//returns true if created with success message and false if not with exception message
+		Context context = cordova.getActivity();
 		if (SharedPref == null) {
 			SharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 		}
